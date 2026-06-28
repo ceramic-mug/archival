@@ -5,6 +5,11 @@ archival-core/target/
 archival-app/.build/
 archival-app/*.xcodeproj/xcuserdata/
 archival-app/*.xcworkspace/xcuserdata/
+archival-app/.swiftpm/xcode/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+xcuserdata/
 *.swp
 .DS_Store
 
