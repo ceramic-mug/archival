@@ -1,0 +1,18 @@
+# Rust
+archival-core/target/
+
+# Swift / Xcode
+archival-app/.build/
+archival-app/*.xcodeproj/xcuserdata/
+archival-app/*.xcworkspace/xcuserdata/
+*.swp
+.DS_Store
+
+# Generated (committed for distribution, ignored during active dev)
+# Uncomment to re-generate on every build without committing:
+# archival-core/include/archival.h
+
+# Secrets — never commit
+*.env
+*.pem
+gemini_key.txt

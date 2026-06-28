@@ -1,0 +1,5 @@
+module CArchivalCore {
+    header "../../../archival-core/include/archival.h"
+    link "archival_core"
+    export *
+}

@@ -1,0 +1,98 @@
+name: Archival
+options:
+  bundleIdPrefix: com.archival
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  groupSortPosition: top
+  createIntermediateGroups: true
+
+packages:
+  ArchivalPackage:
+    path: archival-app
+
+targets:
+  Archival:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Archival/Sources
+    dependencies:
+      - package: ArchivalPackage
+        product: ArchivalCore
+      - package: ArchivalPackage
+        product: ArchivalUI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.archival.mac
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.9"
+        # Link against Rust static lib (no dylib signing required)
+        OTHER_LDFLAGS: "-larchival_core -lsqlite3"
+        LIBRARY_SEARCH_PATHS: "$(SRCROOT)/archival-app/Libs/macos"
+        # Required for Rust staticlib on macOS
+        OTHER_LINKER_FLAGS: "-lc++"
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        INFOPLIST_KEY_CFBundleDisplayName: Archival
+    preBuildScripts:
+      - name: Build Rust Core
+        shell: /bin/bash
+        script: |
+          set -e
+          source "$HOME/.cargo/env"
+          cd "$SRCROOT/archival-core"
+          cargo build --release --target aarch64-apple-darwin 2>&1
+          mkdir -p "$SRCROOT/archival-app/Libs/macos"
+          cp target/aarch64-apple-darwin/release/libarchival_core.a \
+             "$SRCROOT/archival-app/Libs/macos/"
+        basedOnDependencyAnalysis: false
+
+  ArchivaliOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Archival/Sources
+    dependencies:
+      - package: ArchivalPackage
+        product: ArchivalCore
+      - package: ArchivalPackage
+        product: ArchivalUI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.archival.ios
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.9"
+        OTHER_LDFLAGS: "-larchival_core -lsqlite3"
+        LIBRARY_SEARCH_PATHS: "$(SRCROOT)/archival-app/Libs/ios"
+        OTHER_LINKER_FLAGS: "-lc++"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        INFOPLIST_KEY_CFBundleDisplayName: Archival
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    preBuildScripts:
+      - name: Build Rust Core (iOS)
+        shell: /bin/bash
+        script: |
+          set -e
+          source "$HOME/.cargo/env"
+          cd "$SRCROOT/archival-core"
+          # Simulator vs device
+          if [ "$PLATFORM_NAME" = "iphonesimulator" ]; then
+            cargo build --release --target aarch64-apple-ios-sim 2>&1
+            mkdir -p "$SRCROOT/archival-app/Libs/ios"
+            cp target/aarch64-apple-ios-sim/release/libarchival_core.a \
+               "$SRCROOT/archival-app/Libs/ios/"
+          else
+            cargo build --release --target aarch64-apple-ios 2>&1
+            mkdir -p "$SRCROOT/archival-app/Libs/ios"
+            cp target/aarch64-apple-ios/release/libarchival_core.a \
+               "$SRCROOT/archival-app/Libs/ios/"
+          fi
+        basedOnDependencyAnalysis: false
