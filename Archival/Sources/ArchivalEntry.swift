@@ -9,6 +9,8 @@ struct ArchivalEntry: App {
         }
         #if os(macOS)
         .defaultSize(width: 1100, height: 700)
+        #endif
+        #if os(macOS)
         Settings {
             SettingsView()
         }
